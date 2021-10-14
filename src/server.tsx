@@ -6,7 +6,7 @@ import { Router } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import { Provider } from "effector-react/scope";
 import { fork, serialize, allSettled } from "effector";
-import { attachHistory } from "pages";
+import { attachHistory, clocks } from "pages";
 import { SCOPE_DATA_KEY } from "shared/config/constants";
 
 import App from "./app/App";
@@ -48,6 +48,12 @@ export const renderApp = async (
   const history = createMemoryHistory();
 
   await allSettled(attachHistory, { scope, params: history });
+  await allSettled(clocks.push, {
+    scope,
+    params: {
+      to: req.url,
+    },
+  });
 
   const markup = renderToString(
     <Provider value={scope}>
