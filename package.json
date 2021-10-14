@@ -10,7 +10,12 @@
     "start:prod": "NODE_ENV=production node build/server.js"
   },
   "dependencies": {
+    "@effector/reflect": "^7.0.1",
+    "@geist-ui/react": "^2.2.0",
+    "effector": "^22.1.2",
+    "effector-react": "^22.0.4",
     "express": "^4.17.1",
+    "history": "4.10.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.1.2"
@@ -27,6 +32,7 @@
     "@types/react-dom": "^16.9.6",
     "@types/react-router-dom": "^5.1.4",
     "@types/webpack-env": "^1.15.2",
+    "babel-plugin-transform-rename-import": "^2.3.0",
     "babel-preset-razzle": "4.1.0",
     "concurrently": "^5.3.0",
     "cross-env": "^7.0.3",
