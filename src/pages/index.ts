@@ -1,2 +1,2 @@
-export { Pages } from "./pages";
+export { Pages, paths } from "./pages";
 export { attachHistory, clocks, createPathMatcher } from "./controls";
