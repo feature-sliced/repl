@@ -12,6 +12,11 @@
   "dependencies": {
     "@effector/reflect": "^7.0.1",
     "@geist-ui/react": "^2.2.0",
+    "@linaria/babel-preset": "^3.0.0-beta.13",
+    "@linaria/core": "^3.0.0-beta.13",
+    "@linaria/react": "^3.0.0-beta.13",
+    "@linaria/shaker": "^3.0.0-beta.13",
+    "@linaria/webpack-loader": "^3.0.0-beta.13",
     "effector": "^22.1.2",
     "effector-react": "^22.0.4",
     "express": "^4.17.1",

@@ -2,6 +2,12 @@ import React from "react";
 import { Card, Button } from "@geist-ui/react";
 import { reflect } from "@effector/reflect";
 import { $count, up } from "features/count-clicks";
+import { css } from "@linaria/core";
+
+const buttonClass = css`
+  color: red;
+  background-color: blue;
+`;
 
 const Counter = reflect({
   view: Button,
@@ -10,6 +16,7 @@ const Counter = reflect({
       e.target;
     }),
     children: $count,
+    className: buttonClass,
   },
 });
 

@@ -1,4 +1,4 @@
-const presets = ["razzle/babel"];
+const presets = ["razzle/babel", "@linaria"];
 const plugins = [
   "effector/babel-plugin",
   [
