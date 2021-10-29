@@ -1,1 +1,1 @@
-export { fsTree } from "./model";
+export { fsTree, addNewItem } from "./model";

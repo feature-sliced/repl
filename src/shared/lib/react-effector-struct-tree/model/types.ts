@@ -7,11 +7,11 @@ export type Tree = {
   parent: Id | null;
 };
 
-export type ItemState = {
+export type ItemDetails = {
   title: string;
   text?: string;
 };
 
-export type ItemKV = Record<Id, ItemState>;
+export type ItemKV = Record<Id, ItemDetails>;
 
 export type FlatTree = { id: Id; depth: number }[];

@@ -135,25 +135,3 @@ export function moveSubTree(
     return t;
   });
 }
-
-export function flatTree(tree: Tree, withRoot: boolean = false): FlatTree {
-  const result: FlatTree = withRoot ? [{ id: tree.id, depth: 0 }] : [];
-  let depth = 1;
-  let untilNextDepth = tree.children.length;
-  const queue = [...tree.children];
-
-  while (queue.length > 0) {
-    const next = queue.shift();
-    untilNextDepth -= 1;
-
-    result.push({ id: next.id, depth });
-    queue.push(...(next.children ?? []));
-
-    if (!untilNextDepth) {
-      depth += 1;
-      untilNextDepth = queue.length;
-    }
-  }
-
-  return result;
-}

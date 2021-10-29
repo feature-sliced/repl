@@ -4,7 +4,6 @@ import {
   getId,
   moveSubTree,
   removeSubTree,
-  flatTree,
 } from "./lib";
 
 test("can build a tree and modify it and flat it", () => {
@@ -77,63 +76,5 @@ test("can build a tree and modify it and flat it", () => {
       "id": "root",
       "parent": null,
     }
-  `);
-
-  const flatted = flatTree(tree);
-
-  expect(flatted).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "depth": 1,
-        "id": "bla3",
-      },
-      Object {
-        "depth": 2,
-        "id": "bla4",
-      },
-      Object {
-        "depth": 3,
-        "id": "bla6",
-      },
-      Object {
-        "depth": 3,
-        "id": "bla5",
-      },
-      Object {
-        "depth": 3,
-        "id": "bla2",
-      },
-    ]
-  `);
-
-  const flattedWithRoot = flatTree(tree, true);
-
-  expect(flattedWithRoot).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "depth": 0,
-        "id": "root",
-      },
-      Object {
-        "depth": 1,
-        "id": "bla3",
-      },
-      Object {
-        "depth": 2,
-        "id": "bla4",
-      },
-      Object {
-        "depth": 3,
-        "id": "bla6",
-      },
-      Object {
-        "depth": 3,
-        "id": "bla5",
-      },
-      Object {
-        "depth": 3,
-        "id": "bla2",
-      },
-    ]
   `);
 });

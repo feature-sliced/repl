@@ -1,12 +1,11 @@
 import { createStore, createEvent, sample, attach } from "effector";
-import type { Tree, ItemKV, ItemState, Id } from "./types";
+import type { Tree, ItemKV, ItemDetails, Id } from "./types";
 import {
   getId,
   addSubTree,
   removeSubTree,
   moveSubTree,
   createRootTree,
-  flatTree,
 } from "./lib";
 
 export const createTreeState = () => {
@@ -16,7 +15,7 @@ export const createTreeState = () => {
   // effects on tree
   const addItemFx = attach({
     source: $tree,
-    effect(tree, item: ItemState) {
+    effect(tree, item: ItemDetails) {
       const id = getId();
 
       return {
@@ -73,14 +72,14 @@ export const createTreeState = () => {
     });
 
   // public part
-  const addItem = createEvent<ItemState>();
+  const addItem = createEvent<ItemDetails>();
   const removeItem = createEvent<Id>();
   const moveItem = createEvent<{
     id: Id;
     nextParentId: Id;
     index: number;
   }>();
-  const updateItem = createEvent<{ upd: Partial<ItemState>; id: Id }>();
+  const updateItem = createEvent<{ upd: Partial<ItemDetails>; id: Id }>();
 
   $itemsKv.on(updateItem, (reg, { upd, id }) => ({
     ...reg,
@@ -105,19 +104,29 @@ export const createTreeState = () => {
     target: moveSubTreeFx,
   });
 
-  const $flatTree = sample({
-    source: $tree,
-    fn: (tree) => flatTree(tree),
-  });
+  // items states
+  const toggleCollapsed = createEvent<Id>();
+  const $itemsState = createStore<Record<Id, { collapsed: boolean }>>({}).on(
+    toggleCollapsed,
+    (reg, id) => {
+      const state = reg[id] ?? { collapsed: false };
+
+      return {
+        ...reg,
+        [id]: { collapsed: !state.collapsed },
+      };
+    }
+  );
 
   return {
     $tree,
-    $flatTree,
     $itemsKv,
     addItem,
     removeItem,
     moveItem,
     updateItem,
+    $itemsState,
+    toggleCollapsed,
   };
 };
 
