@@ -1,6 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { klona } from "klona/json";
-import type { Id, Tree, FlatTree } from "./types";
+import type { Id, Tree } from "./types";
 
 export const ROOT_ID = "root" as Id;
 
@@ -134,4 +134,18 @@ export function moveSubTree(
 
     return t;
   });
+}
+
+export function flatTreeToList(tree: Tree) {
+  const result: Id[] = [];
+  const queue = tree.children.slice();
+
+  while (queue.length > 0) {
+    const t = queue.shift();
+
+    result.push(t.id);
+    queue.push(...t.children);
+  }
+
+  return result;
 }

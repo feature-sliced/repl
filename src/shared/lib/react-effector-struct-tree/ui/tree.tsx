@@ -2,13 +2,13 @@ import React from "react";
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { useStore, useEvent, useList, useStoreMap } from "effector-react";
-import { useTree } from "./context";
+import { useTreeUnits } from "./context";
 import { Item } from "./item";
 import { Tree } from "../model";
 
 const SubTree: React.FC<{ tree: Tree }> = (props) => {
   const { tree } = props;
-  const units = useTree();
+  const units = useTreeUnits();
   const state = useStoreMap({
     store: units.$itemsState,
     keys: [tree.id],
@@ -27,14 +27,19 @@ const SubTree: React.FC<{ tree: Tree }> = (props) => {
 };
 
 export const StructTreeBase: React.FC = () => {
-  const units = useTree();
+  const units = useTreeUnits();
   const tree = useStore(units.$tree);
+  const sortedIds = useStore(units.$flatList);
 
   return (
     <>
-      {tree.children.map((subtree) => (
-        <SubTree key={subtree.id} tree={subtree} />
-      ))}
+      <DndContext>
+        <SortableContext items={sortedIds}>
+          {tree.children.map((subtree) => (
+            <SubTree key={subtree.id} tree={subtree} />
+          ))}
+        </SortableContext>
+      </DndContext>
     </>
   );
 };

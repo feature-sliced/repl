@@ -4,6 +4,7 @@ import {
   getId,
   moveSubTree,
   removeSubTree,
+  flatTreeToList,
 } from "./lib";
 
 test("can build a tree and modify it and flat it", () => {
@@ -76,5 +77,17 @@ test("can build a tree and modify it and flat it", () => {
       "id": "root",
       "parent": null,
     }
+  `);
+
+  const sortedIds = flatTreeToList(tree);
+
+  expect(sortedIds).toMatchInlineSnapshot(`
+    Array [
+      "bla3",
+      "bla4",
+      "bla6",
+      "bla5",
+      "bla2",
+    ]
   `);
 });

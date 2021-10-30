@@ -13,5 +13,3 @@ export type ItemDetails = {
 };
 
 export type ItemKV = Record<Id, ItemDetails>;
-
-export type FlatTree = { id: Id; depth: number }[];

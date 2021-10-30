@@ -1,4 +1,4 @@
-import { createStore, createEvent, sample, attach } from "effector";
+import { createStore, createEvent, sample, attach, combine } from "effector";
 import type { Tree, ItemKV, ItemDetails, Id } from "./types";
 import {
   getId,
@@ -6,6 +6,7 @@ import {
   removeSubTree,
   moveSubTree,
   createRootTree,
+  flatTreeToList,
 } from "./lib";
 
 export const createTreeState = () => {
@@ -118,6 +119,12 @@ export const createTreeState = () => {
     }
   );
 
+  // needed for @dnd-kit/sortable
+  const $flatList = sample({
+    source: $tree,
+    fn: flatTreeToList,
+  });
+
   return {
     $tree,
     $itemsKv,
@@ -127,6 +134,7 @@ export const createTreeState = () => {
     updateItem,
     $itemsState,
     toggleCollapsed,
+    $flatList,
   };
 };
 
