@@ -1,4 +1,4 @@
-import { createStore, createEvent, sample, attach, combine } from "effector";
+import { createStore, createEvent, sample, attach } from "effector";
 import type { Tree, ItemKV, ItemDetails, Id } from "./types";
 import {
   getId,
@@ -125,6 +125,16 @@ export const createTreeState = () => {
     fn: flatTreeToList,
   });
 
+  // current target
+  const dragStarted = createEvent<Id>();
+  const dragEnded = createEvent();
+  const $dragTarget = createStore<Id | null>(null).reset(dragEnded);
+
+  sample({
+    clock: dragStarted,
+    target: $dragTarget,
+  });
+
   return {
     $tree,
     $itemsKv,
@@ -135,6 +145,9 @@ export const createTreeState = () => {
     $itemsState,
     toggleCollapsed,
     $flatList,
+    dragStarted,
+    dragEnded,
+    $dragTarget,
   };
 };
 

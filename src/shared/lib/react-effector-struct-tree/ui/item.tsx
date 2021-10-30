@@ -22,9 +22,7 @@ const animateLayoutChanges: AnimateLayoutChanges = ({
   wasDragging,
 }) => (isSorting || wasDragging ? false : true);
 
-export const Item: React.FC<{ id: Id; depth: number; collapsed: boolean }> = (
-  props
-) => {
+export const Item: React.FC<{ id: Id; collapsed: boolean }> = (props) => {
   const units = useTreeUnits();
   const item = useStoreMap({
     store: units.$itemsKv,
