@@ -7,7 +7,7 @@ export const ROOT_ID = "root" as Id;
 export const getId = (customId?: string) => {
   if (customId) return customId as Id;
 
-  const id = uuid(4);
+  const id = uuid();
 
   return id as Id;
 };

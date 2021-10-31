@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import {
   DndContext,
   useSensor,
@@ -17,34 +18,7 @@ import { useTreeUnits } from "./context";
 import { Item } from "./item";
 import { Tree } from "../model";
 import { useEvent } from "effector-react/scope";
-import { Id } from "../model/types";
-
-const SubTree: React.FC<{ tree: Tree }> = (props) => {
-  const { tree } = props;
-  const units = useTreeUnits();
-  const state = useStoreMap({
-    store: units.$itemsState,
-    keys: [tree.id],
-    fn: (reg, [id]) => reg[id] ?? { collapsed: false },
-  });
-
-  return (
-    <>
-      <Item id={tree.id} depth={tree.depth} collapsed={state.collapsed} />
-      {!state.collapsed &&
-        tree.children.map((subtree) => (
-          <SubTree key={subtree.id} tree={subtree} />
-        ))}
-    </>
-  );
-};
-
-const adjustTranslate: Modifier = ({ transform }) => {
-  return {
-    ...transform,
-    y: transform.y - 25,
-  };
-};
+import { IS_BROWSER } from "shared/config/constants";
 
 export const StructTreeBase: React.FC = () => {
   const units = useTreeUnits();
@@ -59,14 +33,9 @@ export const StructTreeBase: React.FC = () => {
   return (
     <>
       <DndContext
-        onDragStart={(event) => {
-          dragStartedEv(event.active.id as Id);
-        }}
-        onDragEnd={() => {
-          dragEndedEv();
-        }}
+        onDragStart={dragStartedEv}
+        onDragEnd={dragEndedEv}
         sensors={sensors}
-        modifiers={[adjustTranslate]}
       >
         <SortableContext
           items={sortedIds}
@@ -75,8 +44,43 @@ export const StructTreeBase: React.FC = () => {
           {tree.children.map((subtree) => (
             <SubTree key={subtree.id} tree={subtree} />
           ))}
+          <Overlay />
         </SortableContext>
       </DndContext>
     </>
+  );
+};
+
+const SubTree: React.FC<{ tree: Tree }> = (props) => {
+  const { tree } = props;
+  const units = useTreeUnits();
+  const state = useStoreMap({
+    store: units.$itemsState,
+    keys: [tree.id],
+    fn: (reg, [id]) => reg[id] ?? { collapsed: false },
+  });
+
+  return (
+    <>
+      <Item depth={tree.depth} id={tree.id} collapsed={state.collapsed} />
+      {!state.collapsed &&
+        tree.children.map((subtree) => (
+          <SubTree key={subtree.id} tree={subtree} />
+        ))}
+    </>
+  );
+};
+
+const Overlay: React.FC = () => {
+  const units = useTreeUnits();
+  const targetId = useStore(units.$dragTarget);
+
+  if (!IS_BROWSER) return null;
+
+  return createPortal(
+    <DragOverlay>
+      {targetId ? <Item depth={0} id={targetId} collapsed /> : null}
+    </DragOverlay>,
+    document.body
   );
 };

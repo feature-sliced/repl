@@ -22,7 +22,9 @@ const animateLayoutChanges: AnimateLayoutChanges = ({
   wasDragging,
 }) => (isSorting || wasDragging ? false : true);
 
-export const Item: React.FC<{ id: Id; collapsed: boolean }> = (props) => {
+export const Item: React.FC<{ id: Id; depth: number; collapsed: boolean }> = (
+  props
+) => {
   const units = useTreeUnits();
   const item = useStoreMap({
     store: units.$itemsKv,
@@ -53,7 +55,10 @@ export const Item: React.FC<{ id: Id; collapsed: boolean }> = (props) => {
   };
 
   return (
-    <div ref={setDroppableNodeRef} style={style}>
+    <div
+      ref={setDroppableNodeRef}
+      style={{ ...style, maxWidth: `${100 - props.depth * 2}%` }}
+    >
       <div ref={setDraggableNodeRef}>
         <Card>
           <h4>

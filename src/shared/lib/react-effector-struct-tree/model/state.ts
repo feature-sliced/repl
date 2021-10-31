@@ -8,6 +8,7 @@ import {
   createRootTree,
   flatTreeToList,
 } from "./lib";
+import type { DragStartEvent, DragEndEvent } from "@dnd-kit/core";
 
 export const createTreeState = () => {
   // tree
@@ -126,12 +127,13 @@ export const createTreeState = () => {
   });
 
   // current target
-  const dragStarted = createEvent<Id>();
-  const dragEnded = createEvent();
+  const dragStarted = createEvent<DragStartEvent>();
+  const dragEnded = createEvent<DragEndEvent>();
   const $dragTarget = createStore<Id | null>(null).reset(dragEnded);
 
   sample({
     clock: dragStarted,
+    fn: ({ active }) => active.id as Id,
     target: $dragTarget,
   });
 
