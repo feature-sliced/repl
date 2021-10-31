@@ -45,6 +45,8 @@ function findItemById(
     while (queue.length > 0) {
       const current = queue.shift();
 
+      if (!current) break;
+
       if (current.item.id === id) {
         return current;
       }
@@ -112,6 +114,8 @@ export function moveSubTree(
     const target = findItemById(t, move.subtreeId);
     const currentParent = target.parent;
 
+    if (!currentParent) return tree;
+
     // move inside the same parent
     if (currentParent.id === move.nextParentId) {
       if (target.index === move.index) {
@@ -142,6 +146,8 @@ export function flatTreeToList(tree: Tree) {
 
   while (queue.length > 0) {
     const t = queue.shift();
+
+    if (!t) return result;
 
     result.push(t.id);
     queue.push(...t.children);
