@@ -4,21 +4,12 @@ import { Pages } from "pages";
 import { appMounted } from "shared/config/system-events";
 import { reflect } from "@effector/reflect";
 import { Layout, Content, Header, Footer } from "widgets/templates/page-grid";
-import { Themes } from "@geist-ui/react";
 import { ToastsProvider } from "shared/lib/toast";
 import { initOnboardingFlow } from "processes/onboard-flow";
 import { appStarted } from "shared/config/system-events";
+import { fsTheme } from "shared/config/theme";
 
 import "./App.css";
-
-const fsTheme = Themes.createFromDark({
-  type: "fs",
-  palette: {
-    success: "#dae791",
-    background: "#242526",
-    secondary: "#5496b6",
-  },
-});
 
 appStarted.watch(() => {
   initOnboardingFlow();
@@ -27,7 +18,7 @@ appStarted.watch(() => {
 const App = reflect({
   view: () => {
     return (
-      <GeistProvider>
+      <GeistProvider themes={[fsTheme]} themeType="fs">
         <ToastsProvider />
         <CssBaseline />
         <Layout>

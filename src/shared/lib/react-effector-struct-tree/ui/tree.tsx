@@ -15,7 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useStore, useStoreMap } from "effector-react";
 import { useTreeUnits } from "./context";
-import { Item } from "./item";
+import { Item, ItemBase } from "./item";
 import { Tree } from "../model";
 import { useEvent } from "effector-react/scope";
 import { IS_BROWSER } from "shared/config/constants";
@@ -31,7 +31,7 @@ export const StructTreeBase: React.FC = () => {
   const sensors = useSensors(useSensor(PointerSensor));
 
   return (
-    <>
+    <div>
       <DndContext
         onDragStart={dragStartedEv}
         onDragEnd={dragEndedEv}
@@ -47,7 +47,7 @@ export const StructTreeBase: React.FC = () => {
           <Overlay />
         </SortableContext>
       </DndContext>
-    </>
+    </div>
   );
 };
 
@@ -79,7 +79,7 @@ const Overlay: React.FC = () => {
 
   return createPortal(
     <DragOverlay>
-      {targetId ? <Item depth={0} id={targetId} collapsed /> : null}
+      {targetId ? <ItemBase depth={0} id={targetId} collapsed /> : null}
     </DragOverlay>,
     document.body
   );

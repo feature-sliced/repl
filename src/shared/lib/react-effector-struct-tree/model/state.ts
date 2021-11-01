@@ -7,8 +7,10 @@ import {
   moveSubTree,
   createRootTree,
   flatTreeToList,
+  ROOT_ID,
 } from "./lib";
 import type { DragStartEvent, DragEndEvent } from "@dnd-kit/core";
+import { debug } from "patronum";
 
 export const createTreeState = () => {
   // tree
@@ -135,6 +137,16 @@ export const createTreeState = () => {
     clock: dragStarted,
     fn: ({ active }) => active.id as Id,
     target: $dragTarget,
+  });
+
+  sample({
+    clock: dragEnded,
+    fn: (event) => ({
+      id: event.active.id as Id,
+      nextParentId: ROOT_ID,
+      index: 0,
+    }),
+    target: moveItem,
   });
 
   return {
