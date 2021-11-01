@@ -1,5 +1,5 @@
 import React from "react";
-import { hydrate } from "react-dom";
+import { hydrate, render } from "react-dom";
 import { Router } from "react-router-dom";
 import { fork, allSettled } from "effector";
 import { attachHistory } from "pages";
@@ -22,14 +22,16 @@ const history = createBrowserHistory();
 allSettled(attachHistory, { scope, params: history });
 allSettled(appStarted, { scope });
 
-hydrate(
+const MainApp = () => (
   <Provider value={scope}>
     <Router history={history}>
       <App />
     </Router>
-  </Provider>,
-  document.getElementById("root")
+  </Provider>
 );
+
+// hydrate(<MainApp />, document.getElementById("root"));
+render(<MainApp />, document.getElementById("root"));
 
 if (module.hot) {
   module.hot.accept();
