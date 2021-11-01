@@ -1,4 +1,7 @@
 module.exports = {
+  options: {
+    buildType: "spa",
+  },
   modifyWebpackConfig({
     env: {
       target, // the target 'node' or 'web'
