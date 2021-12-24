@@ -1,2 +1,3 @@
-# fs-repl-proto
-project structures repl
+# feature-sliced repl
+
+🍰 Online playground for project structure
