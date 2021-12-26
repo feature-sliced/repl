@@ -1,4 +1,4 @@
-import { createStore, createEvent, sample, attach } from "effector";
+import { createStore, createEvent, sample, attach, guard } from "effector";
 import type { Tree, ItemKV, ItemDetails, Id } from "./types";
 import {
   getId,
@@ -7,9 +7,8 @@ import {
   moveSubTree,
   createRootTree,
   flatTreeToList,
-  ROOT_ID,
 } from "./lib";
-import type { DragStartEvent, DragEndEvent } from "@dnd-kit/core";
+import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
 import { debug } from "patronum";
 
 export const createTreeState = () => {
@@ -122,6 +121,15 @@ export const createTreeState = () => {
     }
   );
 
+  // used for drag with children's
+  const setCollapse = createEvent<[Id, boolean]>();
+  $itemsState.on(setCollapse, (reg, [id, state]) => {
+    return {
+      ...reg,
+      [id]: {collapsed: state},
+    }
+  })
+
   // needed for @dnd-kit/sortable
   const $flatList = sample({
     source: $tree,
@@ -134,20 +142,48 @@ export const createTreeState = () => {
   const $dragTarget = createStore<Id | null>(null).reset(dragEnded);
 
   sample({
-    clock: dragStarted,
-    fn: ({ active }) => active.id as Id,
-    target: $dragTarget,
-  });
+    source: $tree,
+    clock: [dragStarted, dragEnded],
+    fn: (tree, dragEvent) => {
+      /* collapse while dragging */
+      const isDrop = "over" in dragEvent;
+      return [dragEvent.active.id, !isDrop] as [Id, boolean]
+    },
+    target: setCollapse
+  })
+
 
   sample({
-    clock: dragEnded,
+    clock: guard({
+          clock: dragEnded,
+          filter: event => !!event.over && event.over.id !== event.active.id
+      }),
     fn: (event) => ({
-      id: event.active.id as Id,
-      nextParentId: ROOT_ID,
-      index: 0,
+        id: event.active.id as Id,
+        nextParentId:  event.over?.id as Id,
+        index: 0,
     }),
     target: moveItem,
   });
+
+  // Hover
+  const dragOver = createEvent<DragOverEvent>();
+  const $hoveredNodeId = createStore<Id | null>(null).reset(dragStarted).reset(dragEnded);
+
+  sample({
+    clock: dragOver,
+    fn: (event) => {
+      if(!event.over)
+        return null;
+
+      if(event.active.id === event.over.id)
+        return null;
+
+      return event.over.id as Id;
+    },
+    target: $hoveredNodeId
+  })
+
 
   return {
     $tree,
@@ -162,6 +198,8 @@ export const createTreeState = () => {
     dragStarted,
     dragEnded,
     $dragTarget,
+    dragOver,
+    $hoveredNodeId,
   };
 };
 

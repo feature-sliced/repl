@@ -26,6 +26,7 @@ export const StructTreeBase: React.FC = () => {
   const sortedIds = useStore(units.$flatList);
   const dragStartedEv = useEvent(units.dragStarted);
   const dragEndedEv = useEvent(units.dragEnded);
+  const dragOverEv = useEvent(units.dragOver);
 
   // dnd-stuff
   const sensors = useSensors(useSensor(PointerSensor));
@@ -34,6 +35,7 @@ export const StructTreeBase: React.FC = () => {
     <div>
       <DndContext
         onDragStart={dragStartedEv}
+        onDragOver={dragOverEv}
         onDragEnd={dragEndedEv}
         sensors={sensors}
       >
