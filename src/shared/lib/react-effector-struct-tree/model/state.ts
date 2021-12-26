@@ -126,7 +126,7 @@ export const createTreeState = () => {
   $itemsState.on(setCollapse, (reg, [id, state]) => {
     return {
       ...reg,
-      [id]: {collapsed: state},
+      [id]: { collapsed: state },
     }
   })
 
@@ -155,13 +155,13 @@ export const createTreeState = () => {
 
   sample({
     clock: guard({
-          clock: dragEnded,
-          filter: event => !!event.over && event.over.id !== event.active.id
-      }),
+      clock: dragEnded,
+      filter: event => !!event.over && event.over.id !== event.active.id
+    }),
     fn: (event) => ({
-        id: event.active.id as Id,
-        nextParentId:  event.over?.id as Id,
-        index: 0,
+      id: event.active.id as Id,
+      nextParentId: event.over?.id as Id,
+      index: 0,
     }),
     target: moveItem,
   });
@@ -173,10 +173,10 @@ export const createTreeState = () => {
   sample({
     clock: dragOver,
     fn: (event) => {
-      if(!event.over)
+      if (!event.over)
         return null;
 
-      if(event.active.id === event.over.id)
+      if (event.active.id === event.over.id)
         return null;
 
       return event.over.id as Id;

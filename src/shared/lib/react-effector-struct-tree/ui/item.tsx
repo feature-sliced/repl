@@ -9,7 +9,7 @@ import { Id } from "../model/types";
 import { useEvent } from "effector-react/scope";
 import { AnimateLayoutChanges, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {fsTheme, hoveredNodeBorderStyle, palette, treeDepthPadding} from "shared/config/theme";
+import { fsTheme, hoveredNodeBorderStyle, palette, treeDepthPadding } from "shared/config/theme";
 
 const animateLayoutChanges: AnimateLayoutChanges = ({
   isSorting,
@@ -50,8 +50,8 @@ export const Item: React.FC<ItemProps> = (props) => {
         paddingLeft: treeDepthPadding * (props.depth - 1),
       }}
     >
-      <div ref={setDraggableNodeRef} >
-        <ItemBase {...props} attributes={attributes} listeners={listeners}/>
+      <div ref={setDraggableNodeRef}>
+        <ItemBase {...props} attributes={attributes} listeners={listeners} />
       </div>
     </div>
   );
