@@ -172,18 +172,11 @@ export const createTreeState = () => {
     target: $dragTarget,
   });
 
-  // out of bounds => move to ROOT
+  // when move to out of bounds => move to ROOT
   sample({
     clock: guard({
       clock: dragEnded,
-      filter: (event) => {
-        if (!event.over ||
-          event.over.id === event.active.id && isOutOfBounds(event.delta)) {
-          console.log(event.delta)
-          return true;
-        }
-        return false
-      }
+      filter: (event) => !event.over || event.over.id === event.active.id && isOutOfBounds(event.delta)
     }),
     fn: (event) => ({
       id: event.active.id as Id,
@@ -193,7 +186,7 @@ export const createTreeState = () => {
     target: moveItem,
   })
 
-
+  // move current item to target when we over the target
   sample({
     clock: guard({
       clock: dragEnded,
@@ -223,7 +216,6 @@ export const createTreeState = () => {
     },
     target: $hoveredNodeId
   })
-
 
   return {
     $tree,
