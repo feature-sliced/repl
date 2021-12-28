@@ -9,10 +9,6 @@ import {
   Modifier,
   DragStartEvent,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { useStore, useStoreMap } from "effector-react";
 import { useTreeUnits } from "./context";
 import { Item, ItemBase } from "./item";
@@ -39,15 +35,10 @@ export const StructTreeBase: React.FC = () => {
         onDragEnd={dragEndedEv}
         sensors={sensors}
       >
-        <SortableContext
-          items={sortedIds}
-          strategy={verticalListSortingStrategy}
-        >
           {tree.children.map((subtree) => (
             <SubTree key={subtree.id} tree={subtree} />
           ))}
           <Overlay />
-        </SortableContext>
       </DndContext>
     </div>
   );

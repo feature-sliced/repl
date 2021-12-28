@@ -6,14 +6,20 @@ import {
   removeSubTree,
   moveSubTree,
   createRootTree,
-  flatTreeToList,
+  flatTreeToList, ROOT_ID, isOutOfBounds,
 } from "./lib";
 import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
+import { mockNodesMetaData, mockTree } from "./mockData";
 import { debug } from "patronum";
 
 export const createTreeState = () => {
   // tree
-  const $tree = createStore<Tree>(createRootTree());
+  // FIXME: DEV ONLY
+  let $tree;
+  if (process.env.NODE_ENV === "production")
+    $tree = createStore<Tree>(createRootTree());
+  else
+    $tree = createStore<Tree>(mockTree);
 
   // effects on tree
   const addItemFx = attach({
@@ -63,9 +69,16 @@ export const createTreeState = () => {
     target: $tree,
   });
 
+  // FIXME: DEV ONLY
   // items meta
-  const $itemsKv = createStore<ItemKV>({})
-    .on(addItemFx.doneData, (reg, { item, id }) => ({ ...reg, [id]: item }))
+  let $itemsKv;
+
+  if (process.env.NODE_ENV === "production")
+    $itemsKv = createStore<ItemKV>({});
+  else
+    $itemsKv = createStore<ItemKV>(mockNodesMetaData);
+
+  $itemsKv.on(addItemFx.doneData, (reg, { item, id }) => ({ ...reg, [id]: item }))
     .on(removeItemFx.done, (reg, { params: id }) => {
       const next = { ...reg };
 
@@ -139,17 +152,34 @@ export const createTreeState = () => {
   // current target
   const dragStarted = createEvent<DragStartEvent>();
   const dragEnded = createEvent<DragEndEvent>();
+  const dragOver = createEvent<DragOverEvent>();
   const $dragTarget = createStore<Id | null>(null).reset(dragEnded);
 
   sample({
-    source: $tree,
-    clock: [dragStarted, dragEnded],
-    fn: (tree, dragEvent) => {
-      /* collapse while dragging */
-      const isDrop = "over" in dragEvent;
-      return [dragEvent.active.id, !isDrop] as [Id, boolean]
-    },
-    target: setCollapse
+    clock: dragOver,
+    fn: ({ active }) => active.id as Id,
+    target: $dragTarget,
+  });
+
+  // out of bounds => move to ROOT
+  sample({
+    clock: guard({
+      clock: dragEnded,
+      filter: (event) => {
+        if (!event.over ||
+          event.over.id === event.active.id && isOutOfBounds(event.delta)) {
+          console.log(event.delta)
+          return true;
+        }
+        return false
+      }
+    }),
+    fn: (event) => ({
+      id: event.active.id as Id,
+      nextParentId: ROOT_ID,
+      index: 0,
+    }),
+    target: moveItem,
   })
 
 
@@ -167,7 +197,6 @@ export const createTreeState = () => {
   });
 
   // Hover
-  const dragOver = createEvent<DragOverEvent>();
   const $hoveredNodeId = createStore<Id | null>(null).reset(dragStarted).reset(dragEnded);
 
   sample({
