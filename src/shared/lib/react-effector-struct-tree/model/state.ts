@@ -155,6 +155,17 @@ export const createTreeState = () => {
   const dragOver = createEvent<DragOverEvent>();
   const $dragTarget = createStore<Id | null>(null).reset(dragEnded);
 
+  // collapse on dragging
+  sample({
+    source: $tree,
+    clock: [dragStarted, dragEnded],
+    fn: (tree, dragEvent) => {
+      const isDrop = "over" in dragEvent;
+      return [dragEvent.active.id, !isDrop] as [Id, boolean]
+    },
+    target: setCollapse
+  })
+
   sample({
     clock: dragOver,
     fn: ({ active }) => active.id as Id,
