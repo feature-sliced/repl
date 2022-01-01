@@ -103,11 +103,11 @@ export function addSubTree(tree: Tree, item: { id: Id }): Tree {
   });
 }
 
-function modNodeDepth(treeNode: Tree, fn: (_: number) => number): void {
+function modNodeDepth(treeNode: Tree, depthMod: number): void {
   treeNode.children.forEach((childrenNode) => {
-    childrenNode.depth = fn(childrenNode.depth);
+    childrenNode.depth += depthMod;
     if (childrenNode.children.length)
-      modNodeDepth(childrenNode, fn);
+      modNodeDepth(childrenNode, depthMod);
   })
 }
 
@@ -139,16 +139,13 @@ export function moveSubTree(
     }
 
     const nextParent = findItemById(t, move.nextParentId);
+    const depthModifier = nextParent.item.depth + 1 - target.item.depth;
 
     currentParent.children.splice(target.index, 1);
     nextParent.item.children.splice(move.index, 0, target.item);
-    const depthModifier = nextParent.item.depth + 1 - target.item.depth;
     target.item.depth = nextParent.item.depth + 1;
 
-    if (target.item.children.length && nextParent.item.id !== ROOT_ID)
-      modNodeDepth(target.item, (depth) => depth + depthModifier);
-    else
-      modNodeDepth(target.item, (depth) => depth - depthModifier);
+    modNodeDepth(target.item, depthModifier);
 
     target.item.parent = nextParent.item.id;
 
