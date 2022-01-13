@@ -12,7 +12,7 @@ import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core"
 import { mockNodesMetaData, mockTree } from "./mockData";
 import { debug } from "patronum";
 
-export const createTreeState = () => {
+export const createTreeState = ({limitX = -200, limitY = -30}) => {
   // tree
   // FIXME: DEV ONLY
   let $tree;
@@ -176,7 +176,7 @@ export const createTreeState = () => {
   sample({
     clock: guard({
       clock: dragEnded,
-      filter: (event) => !event.over || event.over.id === event.active.id && isOutOfBounds(event.delta)
+      filter: (event) => !event.over || event.over.id === event.active.id && isOutOfBounds(event.delta, limitX, limitY)
     }),
     fn: (event) => ({
       id: event.active.id as Id,

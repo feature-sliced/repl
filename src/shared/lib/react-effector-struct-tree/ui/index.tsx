@@ -10,15 +10,16 @@ type StructTreeProps = {
   hoveredNodeClassName?: string;
 };
 
-const treeInitialStyle = {
+const treeDefaultStyle = {
   hoveredNode: {
     border: "2px solid #f81ce5"
   },
 }
 
+
 export const StructTree: React.FC<StructTreeProps> = ({
   tree,
-  style = treeInitialStyle,
+  style = treeDefaultStyle,
   depthPadding = 30,
   hoveredNodeClassName,
 }) => (
@@ -34,5 +35,3 @@ export const StructTree: React.FC<StructTreeProps> = ({
     </TreeThemeProvider>
   </TreeProvider>
 );
-
-

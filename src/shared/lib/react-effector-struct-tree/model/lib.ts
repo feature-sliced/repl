@@ -169,6 +169,6 @@ export function flatTreeToList(tree: Tree) {
   return result;
 }
 
-export function isOutOfBounds(delta: Coordinates, limitX = -200, limitY = -30) {
+export function isOutOfBounds(delta: Coordinates, limitX: number, limitY: number) {
   return delta.x < limitX || delta.y < limitY;
 }
