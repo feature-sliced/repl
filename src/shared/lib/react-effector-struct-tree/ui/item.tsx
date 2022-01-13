@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import { Move, ChevronDown, ChevronRight, Trash2 } from "@geist-ui/react-icons";
 import { styled } from "@linaria/react";
 import { Button } from "@geist-ui/react";
-import { useTreeUnits } from "./context";
+import { useTreeTheme, useTreeUnits } from "./context";
 import { useStore, useStoreMap} from "effector-react";
 import { Id } from "../model/types";
 import { useEvent } from "effector-react/scope";
@@ -42,12 +42,14 @@ export const Item: React.FC<ItemProps> = (props) => {
     transition,
   };
 
+  const theme = useTreeTheme();
+
   return (
     <div
       ref={setDroppableNodeRef}
       style={{ ...style,
         maxWidth: `${100 - props.depth * 2}%`,
-        paddingLeft: treeDepthPadding * (props.depth - 1),
+        paddingLeft: theme.depthPadding * (props.depth - 1),
       }}
     >
       <div ref={setDraggableNodeRef}>
@@ -63,6 +65,7 @@ export const ItemBase: React.FC<
     listeners?: ReturnType<typeof useSortable>["listeners"];
   }
 > = (props) => {
+  const theme = useTreeTheme();
   const units = useTreeUnits();
   const hoveredTreeNodeId = useStore(units.$hoveredNodeId);
   const item = useStoreMap({
@@ -76,7 +79,7 @@ export const ItemBase: React.FC<
 
   return (
     <Box style={
-      { border: hoveredTreeNodeId === props.id ? hoveredNodeBorderStyle : "" }
+      hoveredTreeNodeId === props.id ? theme.style.hoveredNode : {}
     }>
       <span>
         <DragHandle {...props.attributes} {...props.listeners} />{" "}
