@@ -1,4 +1,5 @@
 import { createStore, createEvent, sample, attach, guard } from "effector";
+import { persist } from "effector-storage/local"
 import type { Tree, ItemKV, ItemDetails, Id } from "./types";
 import {
   getId,
@@ -9,17 +10,11 @@ import {
   flatTreeToList, ROOT_ID, isOutOfBounds,
 } from "./lib";
 import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
-import { mockNodesMetaData, mockTree } from "./mockData";
 import { debug } from "patronum";
 
-export const createTreeState = ({limitX = -200, limitY = -30}) => {
+export const createTreeState = (limitX = -200, limitY = -30) => {
   // tree
-  // FIXME: DEV ONLY
-  let $tree;
-  if (process.env.NODE_ENV === "production")
-    $tree = createStore<Tree>(createRootTree());
-  else
-    $tree = createStore<Tree>(mockTree);
+  const $tree = createStore<Tree>(createRootTree());
 
   // effects on tree
   const addItemFx = attach({
@@ -69,14 +64,8 @@ export const createTreeState = ({limitX = -200, limitY = -30}) => {
     target: $tree,
   });
 
-  // FIXME: DEV ONLY
   // items meta
-  let $itemsKv;
-
-  if (process.env.NODE_ENV === "production")
-    $itemsKv = createStore<ItemKV>({});
-  else
-    $itemsKv = createStore<ItemKV>(mockNodesMetaData);
+  const $itemsKv = createStore<ItemKV>({});
 
   $itemsKv.on(addItemFx.doneData, (reg, { item, id }) => ({ ...reg, [id]: item }))
     .on(removeItemFx.done, (reg, { params: id }) => {
@@ -86,6 +75,17 @@ export const createTreeState = ({limitX = -200, limitY = -30}) => {
 
       return next;
     });
+
+  // save draft tree and meta to localStorage
+  persist({
+    store: $tree,
+    key: "draft-tree"
+  })
+
+  persist({
+    store: $itemsKv,
+    key: "draft-tree-meta"
+  })
 
   // public part
   const addItem = createEvent<ItemDetails>();
