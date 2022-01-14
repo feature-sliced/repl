@@ -12,7 +12,8 @@ import {
 import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
 import { debug } from "patronum";
 
-export const createTreeState = (limitX = -200, limitY = -30) => {
+export const createTreeState = (config: { limitX?: number; limitY?: number } = {}) => {
+  const { limitX = -200, limitY = -30 } = config;
   // tree
   const $tree = createStore<Tree>(createRootTree());
 
