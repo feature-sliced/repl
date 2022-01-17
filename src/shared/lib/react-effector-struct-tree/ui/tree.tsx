@@ -16,7 +16,11 @@ import { Tree } from "../model";
 import { useEvent } from "effector-react/scope";
 import { IS_BROWSER } from "shared/config/constants";
 
-export const StructTreeBase: React.FC = () => {
+type StructTreeBaseProps = {
+  style?: React.CSSProperties
+}
+
+export const StructTreeBase: React.FC<StructTreeBaseProps> = (props) => {
   const units = useTreeUnits();
   const tree = useStore(units.$tree);
   const sortedIds = useStore(units.$flatList);
@@ -28,7 +32,7 @@ export const StructTreeBase: React.FC = () => {
   const sensors = useSensors(useSensor(PointerSensor));
 
   return (
-    <div>
+    <div style={props.style}>
       <DndContext
         onDragStart={dragStartedEv}
         onDragOver={dragOverEv}

@@ -15,10 +15,10 @@ export const useTreeUnits = () => {
 export const TreeProvider = TreeStateContext.Provider;
 
 
-type TreeTheme = {
+export type TreeTheme = {
   depthPadding: number;
-  style: Record<string, React.CSSProperties>
-  hoveredNodeClassName?: string;
+  hoveredNodeStyle: React.CSSProperties
+  hoveredNodeClassName: string;
 }
 
 const TreeThemeContext = createContext<TreeTheme | null>(null);

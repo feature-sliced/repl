@@ -49,7 +49,7 @@ export const Item: React.FC<ItemProps> = (props) => {
       ref={setDroppableNodeRef}
       style={{ ...style,
         maxWidth: `${100 - props.depth * 2}%`,
-        paddingLeft: theme.depthPadding * (props.depth - 1),
+        paddingLeft: theme.depthPadding * (props.depth - 1) ,
       }}
     >
       <div ref={setDraggableNodeRef}>
@@ -78,8 +78,10 @@ export const ItemBase: React.FC<
   const remove = useEvent(units.removeItem);
 
   return (
-    <Box style={
-      hoveredTreeNodeId === props.id ? theme.style.hoveredNode : {}
+    <Box
+      className={theme.hoveredNodeClassName}
+      style={
+      hoveredTreeNodeId === props.id ? theme.hoveredNodeStyle : {}
     }>
       <span>
         <DragHandle {...props.attributes} {...props.listeners} />{" "}
