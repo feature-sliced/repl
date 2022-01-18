@@ -5,7 +5,7 @@ import { StructTreeBase } from "./tree";
 
 type StructTreeProps = {
   tree: ITreeState;
-  style?: Record<string, React.CSSProperties>;
+  style?: React.CSSProperties;
 } & Partial<TreeTheme>;
 
 const hoveredNodeDefaultStyle = {
