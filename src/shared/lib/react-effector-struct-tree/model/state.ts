@@ -1,4 +1,5 @@
-import { createStore, createEvent, sample, attach } from "effector";
+import { createStore, createEvent, sample, attach, guard } from "effector";
+import { persist } from "effector-storage/local"
 import type { Tree, ItemKV, ItemDetails, Id } from "./types";
 import {
   getId,
@@ -6,13 +7,13 @@ import {
   removeSubTree,
   moveSubTree,
   createRootTree,
-  flatTreeToList,
-  ROOT_ID,
+  flatTreeToList, ROOT_ID, isOutOfBounds,
 } from "./lib";
-import type { DragStartEvent, DragEndEvent } from "@dnd-kit/core";
+import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
 import { debug } from "patronum";
 
-export const createTreeState = () => {
+export const createTreeState = (config: { limitX?: number; limitY?: number } = {}) => {
+  const { limitX = -200, limitY = -30 } = config;
   // tree
   const $tree = createStore<Tree>(createRootTree());
 
@@ -65,8 +66,9 @@ export const createTreeState = () => {
   });
 
   // items meta
-  const $itemsKv = createStore<ItemKV>({})
-    .on(addItemFx.doneData, (reg, { item, id }) => ({ ...reg, [id]: item }))
+  const $itemsKv = createStore<ItemKV>({});
+
+  $itemsKv.on(addItemFx.doneData, (reg, { item, id }) => ({ ...reg, [id]: item }))
     .on(removeItemFx.done, (reg, { params: id }) => {
       const next = { ...reg };
 
@@ -74,6 +76,17 @@ export const createTreeState = () => {
 
       return next;
     });
+
+  // save draft tree and meta to localStorage
+  persist({
+    store: $tree,
+    key: "draft-tree"
+  })
+
+  persist({
+    store: $itemsKv,
+    key: "draft-tree-meta"
+  })
 
   // public part
   const addItem = createEvent<ItemDetails>();
@@ -122,6 +135,15 @@ export const createTreeState = () => {
     }
   );
 
+  // used for drag with children's
+  const setCollapse = createEvent<[Id, boolean]>();
+  $itemsState.on(setCollapse, (reg, [id, state]) => {
+    return {
+      ...reg,
+      [id]: { collapsed: state },
+    }
+  })
+
   // needed for @dnd-kit/sortable
   const $flatList = sample({
     source: $tree,
@@ -131,23 +153,70 @@ export const createTreeState = () => {
   // current target
   const dragStarted = createEvent<DragStartEvent>();
   const dragEnded = createEvent<DragEndEvent>();
+  const dragOver = createEvent<DragOverEvent>();
   const $dragTarget = createStore<Id | null>(null).reset(dragEnded);
 
+  // collapse on dragging
   sample({
-    clock: dragStarted,
+    source: $tree,
+    clock: [dragStarted, dragEnded],
+    fn: (tree, dragEvent) => {
+      const isDrop = "over" in dragEvent;
+      return [dragEvent.active.id, !isDrop] as [Id, boolean]
+    },
+    target: setCollapse
+  })
+
+  sample({
+    clock: dragOver,
     fn: ({ active }) => active.id as Id,
     target: $dragTarget,
   });
 
+  // when move to out of bounds => move to ROOT
   sample({
-    clock: dragEnded,
+    clock: guard({
+      clock: dragEnded,
+      filter: (event) => !event.over || event.over.id === event.active.id && isOutOfBounds(event.delta, limitX, limitY)
+    }),
     fn: (event) => ({
       id: event.active.id as Id,
       nextParentId: ROOT_ID,
       index: 0,
     }),
     target: moveItem,
+  })
+
+  // move current item to target when we over the target
+  sample({
+    clock: guard({
+      clock: dragEnded,
+      filter: event => !!event.over && event.over.id !== event.active.id
+    }),
+    fn: (event) => ({
+      id: event.active.id as Id,
+      nextParentId: event.over?.id as Id,
+      index: 0,
+    }),
+    target: moveItem,
   });
+
+  // Hover
+  const $hoveredNodeId = createStore<Id | null>(null).reset(dragStarted).reset(dragEnded);
+
+  sample({
+    clock: dragOver,
+    fn: (event) => {
+      if (!event.over)
+        return null;
+
+      if (event.active.id === event.over.id)
+        return null;
+
+      return event.over.id as Id;
+    },
+    target: $hoveredNodeId
+  })
 
   return {
     $tree,
@@ -162,6 +231,8 @@ export const createTreeState = () => {
     dragStarted,
     dragEnded,
     $dragTarget,
+    dragOver,
+    $hoveredNodeId,
   };
 };
 

@@ -2,6 +2,8 @@ import { Themes } from "@geist-ui/react";
 
 export const desktopBp = 900;
 export const contentMaxWidth = 600;
+export const treeDepthPadding = 30;
+export const hoveredNodeBorderStyle = "2px solid #f81ce5";
 
 export const palette = {
   success: "#176ecc",

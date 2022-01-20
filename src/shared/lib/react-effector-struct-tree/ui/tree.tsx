@@ -9,10 +9,6 @@ import {
   Modifier,
   DragStartEvent,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { useStore, useStoreMap } from "effector-react";
 import { useTreeUnits } from "./context";
 import { Item, ItemBase } from "./item";
@@ -20,32 +16,33 @@ import { Tree } from "../model";
 import { useEvent } from "effector-react/scope";
 import { IS_BROWSER } from "shared/config/constants";
 
-export const StructTreeBase: React.FC = () => {
+type StructTreeBaseProps = {
+  style?: React.CSSProperties
+}
+
+export const StructTreeBase: React.FC<StructTreeBaseProps> = (props) => {
   const units = useTreeUnits();
   const tree = useStore(units.$tree);
   const sortedIds = useStore(units.$flatList);
   const dragStartedEv = useEvent(units.dragStarted);
   const dragEndedEv = useEvent(units.dragEnded);
+  const dragOverEv = useEvent(units.dragOver);
 
   // dnd-stuff
   const sensors = useSensors(useSensor(PointerSensor));
 
   return (
-    <div>
+    <div style={props.style}>
       <DndContext
         onDragStart={dragStartedEv}
+        onDragOver={dragOverEv}
         onDragEnd={dragEndedEv}
         sensors={sensors}
       >
-        <SortableContext
-          items={sortedIds}
-          strategy={verticalListSortingStrategy}
-        >
           {tree.children.map((subtree) => (
             <SubTree key={subtree.id} tree={subtree} />
           ))}
           <Overlay />
-        </SortableContext>
       </DndContext>
     </div>
   );

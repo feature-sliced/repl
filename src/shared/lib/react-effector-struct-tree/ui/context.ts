@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 import type { ITreeState } from "../model";
 
 const TreeStateContext = createContext<ITreeState | null>(null);
@@ -13,3 +13,24 @@ export const useTreeUnits = () => {
   return units;
 };
 export const TreeProvider = TreeStateContext.Provider;
+
+
+export type TreeTheme = {
+  depthPadding: number;
+  hoveredNodeStyle: React.CSSProperties
+  hoveredNodeClassName: string;
+}
+
+const TreeThemeContext = createContext<TreeTheme | null>(null);
+
+export const useTreeTheme = () => {
+  const theme = useContext(TreeThemeContext);
+
+  if (!theme) {
+    throw Error("No any 'theme' are provided!");
+  }
+
+  return theme;
+};
+
+export const TreeThemeProvider = TreeThemeContext.Provider;

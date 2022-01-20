@@ -1,6 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { klona } from "klona/json";
 import type { Id, Tree } from "./types";
+import { Coordinates } from "@dnd-kit/utilities";
 
 export const ROOT_ID = "root" as Id;
 
@@ -102,6 +103,14 @@ export function addSubTree(tree: Tree, item: { id: Id }): Tree {
   });
 }
 
+function treeForEach(tree: Tree, cb: (subtree: Tree) => void) {
+  tree.children.forEach((childrenNode) => {
+    cb(childrenNode);
+    if (childrenNode.children.length)
+      treeForEach(childrenNode, cb);
+  })
+}
+
 export function moveSubTree(
   tree: Tree,
   move: {
@@ -130,10 +139,14 @@ export function moveSubTree(
     }
 
     const nextParent = findItemById(t, move.nextParentId);
+    const depthModifier = nextParent.item.depth + 1 - target.item.depth;
 
     currentParent.children.splice(target.index, 1);
     nextParent.item.children.splice(move.index, 0, target.item);
     target.item.depth = nextParent.item.depth + 1;
+
+    treeForEach(target.item, (node) => node.depth += depthModifier );
+
     target.item.parent = nextParent.item.id;
 
     return t;
@@ -154,4 +167,8 @@ export function flatTreeToList(tree: Tree) {
   }
 
   return result;
+}
+
+export function isOutOfBounds(delta: Coordinates, limitX: number, limitY: number) {
+  return delta.x < limitX || delta.y < limitY;
 }

@@ -3,13 +3,13 @@ import type { CSSProperties } from "react";
 import { Move, ChevronDown, ChevronRight, Trash2 } from "@geist-ui/react-icons";
 import { styled } from "@linaria/react";
 import { Button } from "@geist-ui/react";
-import { useTreeUnits } from "./context";
-import { useStoreMap } from "effector-react";
+import { useTreeTheme, useTreeUnits } from "./context";
+import { useStore, useStoreMap} from "effector-react";
 import { Id } from "../model/types";
 import { useEvent } from "effector-react/scope";
 import { AnimateLayoutChanges, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { fsTheme, palette } from "shared/config/theme";
+import { fsTheme, hoveredNodeBorderStyle, palette, treeDepthPadding } from "shared/config/theme";
 
 const animateLayoutChanges: AnimateLayoutChanges = ({
   isSorting,
@@ -42,10 +42,15 @@ export const Item: React.FC<ItemProps> = (props) => {
     transition,
   };
 
+  const theme = useTreeTheme();
+
   return (
     <div
       ref={setDroppableNodeRef}
-      style={{ ...style, maxWidth: `${100 - props.depth * 2}%` }}
+      style={{ ...style,
+        maxWidth: `${100 - props.depth * 2}%`,
+        paddingLeft: theme.depthPadding * (props.depth - 1) ,
+      }}
     >
       <div ref={setDraggableNodeRef}>
         <ItemBase {...props} attributes={attributes} listeners={listeners} />
@@ -60,7 +65,9 @@ export const ItemBase: React.FC<
     listeners?: ReturnType<typeof useSortable>["listeners"];
   }
 > = (props) => {
+  const theme = useTreeTheme();
   const units = useTreeUnits();
+  const hoveredTreeNodeId = useStore(units.$hoveredNodeId);
   const item = useStoreMap({
     store: units.$itemsKv,
     keys: [props.id],
@@ -71,7 +78,11 @@ export const ItemBase: React.FC<
   const remove = useEvent(units.removeItem);
 
   return (
-    <Box>
+    <Box
+      className={theme.hoveredNodeClassName}
+      style={
+      hoveredTreeNodeId === props.id ? theme.hoveredNodeStyle : {}
+    }>
       <span>
         <DragHandle {...props.attributes} {...props.listeners} />{" "}
         <Button
