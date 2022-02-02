@@ -37,6 +37,7 @@ type ItemProps = {
   id: Id;
   depth: number;
   collapsed: boolean;
+  editMode: boolean;
 };
 
 export const Item: React.FC<ItemProps> = (props) => {
@@ -79,6 +80,16 @@ export const Item: React.FC<ItemProps> = (props) => {
   );
 };
 
+type PopupProps = {
+  text: string;
+}
+
+const PopupContent: React.FC<PopupProps> = ({text}) => (
+    <div style={{ padding: "0 10px" }}>
+      <p>{text}</p>
+    </div>
+);
+
 export const ItemBase: React.FC<ItemProps & {
   attributes?: ReturnType<typeof useSortable>["attributes"];
   listeners?: ReturnType<typeof useSortable>["listeners"];
@@ -95,12 +106,12 @@ export const ItemBase: React.FC<ItemProps & {
   const toggleCollapse = useEvent(units.toggleCollapsed);
   const remove = useEvent(units.removeItem);
 
-  const [isEditMode, setEditMode] = React.useState(false);
   const [titleInputValue, setTitleInputValue] = React.useState(item.title);
   const [descriptionInputValue, setDescriptionInputValue] = React.useState(
     item.text,
   );
   const saveEvent = useEvent(units.updateItem);
+  const toggleEditMode = useEvent(units.toggleEditMode);
 
   const handeSave = () => {
     saveEvent({
@@ -110,14 +121,8 @@ export const ItemBase: React.FC<ItemProps & {
       },
       id: props.id,
     });
-    setEditMode(false);
+    toggleEditMode(props.id)
   };
-
-  const popupContent = (text: string) => (
-    <div style={{ padding: "0 10px" }}>
-      <p>{text}</p>
-    </div>
-  );
 
   return (
     <Box
@@ -134,7 +139,7 @@ export const ItemBase: React.FC<ItemProps & {
                 scale={1 / 3}
                 onClick={() => toggleCollapse(props.id)}
               />
-              {isEditMode ? (
+              {props.editMode ? (
                 <Button
                   iconRight={<Save/>}
                   auto
@@ -150,12 +155,12 @@ export const ItemBase: React.FC<ItemProps & {
                   scale={1 / 3}
                   type="secondary-light"
                   ghost
-                  onClick={() => setEditMode(true)}
+                  onClick={() => toggleEditMode(props.id)}
                 />
               )}
             </span>
       <Details>
-        {isEditMode ? (
+        {props.editMode ? (
           <>
             <Input
               scale={2 / 3}
@@ -182,10 +187,10 @@ export const ItemBase: React.FC<ItemProps & {
           </>
         ) : (
           <>
-            <Popover content={popupContent(item.title || "")}>
+            <Popover content={<PopupContent text={item.title || ""}/>}>
               <h4>{trimText(item.title, TITLE_LENGTH_LIMIT)}</h4>
             </Popover>
-            <Popover content={popupContent(item.text || "")}>
+            <Popover content={<PopupContent text={item.text || ""}/>}>
               <p>
                 {trimText(
                   item.text || "",
@@ -198,14 +203,14 @@ export const ItemBase: React.FC<ItemProps & {
       </Details>
 
       <div>
-        {isEditMode ? (
+        {props.editMode ? (
           <Button
             iconRight={<Delete/>}
             auto
             scale={1 / 3}
             type="error"
             ghost
-            onClick={() => setEditMode(false)}
+            onClick={() => toggleEditMode(props.id)}
           />
         ) : (
           <Button

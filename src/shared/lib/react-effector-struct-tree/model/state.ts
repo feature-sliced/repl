@@ -1,6 +1,6 @@
 import { createStore, createEvent, sample, attach, guard } from "effector";
 import { persist } from "effector-storage/local"
-import type { Tree, ItemKV, ItemDetails, Id } from "./types";
+import type { Tree, ItemKV, ItemDetails, Id, ItemState } from "./types";
 import {
   getId,
   addSubTree,
@@ -11,6 +11,11 @@ import {
 } from "./lib";
 import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
 import { debug } from "patronum";
+
+export const defaultItemState = {
+  collapsed: false,
+  editMode: false,
+}
 
 export const createTreeState = (config: { limitX?: number; limitY?: number } = {}) => {
   const { limitX = -200, limitY = -30 } = config;
@@ -123,16 +128,32 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
 
   // items states
   const toggleCollapsed = createEvent<Id>();
-  const $itemsState = createStore<Record<Id, { collapsed: boolean }>>({}).on(
+  const toggleEditMode = createEvent<Id>();
+
+  const $itemsState = createStore<Record<Id, ItemState>>({});
+
+  $itemsState.on(
     toggleCollapsed,
     (reg, id) => {
-      const state = reg[id] ?? { collapsed: false };
+      const state = reg[id] ??  defaultItemState;
 
       return {
         ...reg,
-        [id]: { collapsed: !state.collapsed },
+        [id]: { ...state, collapsed: !state.collapsed },
       };
     }
+  );
+
+  $itemsState.on(
+      toggleEditMode,
+      (reg, id) => {
+        const state = reg[id] ??  defaultItemState;
+
+        return {
+          ...reg,
+          [id]: { ...state, editMode: !state.editMode },
+        };
+      }
   );
 
   // used for drag with children's
@@ -227,6 +248,7 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
     updateItem,
     $itemsState,
     toggleCollapsed,
+    toggleEditMode,
     $flatList,
     dragStarted,
     dragEnded,
