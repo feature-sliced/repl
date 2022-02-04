@@ -1,6 +1,6 @@
 import { createStore, createEvent, sample, attach, guard } from "effector";
-import { persist } from "effector-storage/local"
-import type { Tree, ItemKV, ItemDetails, Id, ItemState } from "./types";
+import { persist } from "effector-storage/local";
+import type { Tree, ItemKV, ItemDetails, Id, ItemState, ItemDynamicState } from "./types";
 import {
   getId,
   addSubTree,
@@ -10,12 +10,17 @@ import {
   flatTreeToList, ROOT_ID, isOutOfBounds,
 } from "./lib";
 import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
-import { debug } from "patronum";
+import { debug, spread } from "patronum";
 
 export const defaultItemState = {
   collapsed: false,
   editMode: false,
-}
+};
+
+export const defaultDynamicItemState = {
+  editTitle: "",
+  editText: "",
+};
 
 export const createTreeState = (config: { limitX?: number; limitY?: number } = {}) => {
   const { limitX = -200, limitY = -30 } = config;
@@ -86,12 +91,12 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
   persist({
     store: $tree,
     key: "draft-tree"
-  })
+  });
 
   persist({
     store: $itemsKv,
     key: "draft-tree-meta"
-  })
+  });
 
   // public part
   const addItem = createEvent<ItemDetails>();
@@ -135,7 +140,7 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
   $itemsState.on(
     toggleCollapsed,
     (reg, id) => {
-      const state = reg[id] ??  defaultItemState;
+      const state = reg[id] ?? defaultItemState;
 
       return {
         ...reg,
@@ -145,16 +150,72 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
   );
 
   $itemsState.on(
-      toggleEditMode,
-      (reg, id) => {
-        const state = reg[id] ??  defaultItemState;
+    toggleEditMode,
+    (reg, id) => {
+      const state = reg[id] ?? defaultItemState;
 
-        return {
-          ...reg,
-          [id]: { ...state, editMode: !state.editMode },
-        };
-      }
+      return {
+        ...reg,
+        [id]: { ...state, editMode: !state.editMode },
+      };
+    }
   );
+
+  // not saved states
+  const editItemTitle = createEvent<{ id: Id, text: string }>();
+  const editItemText = createEvent<{ id: Id, text: string }>();
+  const saveEditData = createEvent<Id>();
+
+  const $itemsDynamicState = createStore<Record<Id, ItemDynamicState>>({});
+
+  sample({
+    source: $itemsDynamicState,
+    clock: sample({
+      source: $itemsKv,
+      clock: toggleEditMode,
+      fn: (source, id) => ({ id: id, title: source[id].title, text: source[id].text }),
+    }),
+    fn: (source, clock) => ({ ...source, [clock.id]: { editTitle: clock.title, editText: clock.text } }),
+    target: $itemsDynamicState
+  });
+
+  $itemsDynamicState.on(
+    editItemTitle,
+    (reg, payload) => {
+      const state = reg[payload.id] ?? defaultDynamicItemState;
+
+      return {
+        ...reg,
+        [payload.id]: { ...state, editTitle: payload.text },
+      };
+    }
+  );
+
+  $itemsDynamicState.on(
+    editItemText,
+    (reg, payload) => {
+      const state = reg[payload.id] ?? defaultDynamicItemState;
+
+      return {
+        ...reg,
+        [payload.id]: { ...state, editText: payload.text },
+      };
+    }
+  );
+
+  sample({
+    source: $itemsKv,
+    clock: sample({
+      source: $itemsDynamicState,
+      clock: saveEditData,
+      fn: (state, id) => ({ id: id, data: state[id] }),
+    }),
+    fn: (reg, payload) => ({
+      ...reg,
+      [payload.id]: { ...reg[payload.id], text: payload.data.editText, title: payload.data.editTitle }
+    }),
+    target: $itemsKv
+  });
 
   // used for drag with children's
   const setCollapse = createEvent<[Id, boolean]>();
@@ -162,8 +223,8 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
     return {
       ...reg,
       [id]: { collapsed: state },
-    }
-  })
+    };
+  });
 
   // needed for @dnd-kit/sortable
   const $flatList = sample({
@@ -183,10 +244,10 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
     clock: [dragStarted, dragEnded],
     fn: (tree, dragEvent) => {
       const isDrop = "over" in dragEvent;
-      return [dragEvent.active.id, !isDrop] as [Id, boolean]
+      return [dragEvent.active.id, !isDrop] as [Id, boolean];
     },
     target: setCollapse
-  })
+  });
 
   sample({
     clock: dragOver,
@@ -206,7 +267,7 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
       index: 0,
     }),
     target: moveItem,
-  })
+  });
 
   // move current item to target when we over the target
   sample({
@@ -237,7 +298,7 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
       return event.over.id as Id;
     },
     target: $hoveredNodeId
-  })
+  });
 
   return {
     $tree,
@@ -255,6 +316,11 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
     $dragTarget,
     dragOver,
     $hoveredNodeId,
+    // dynamic
+    $itemsDynamicState,
+    editItemText,
+    editItemTitle,
+    saveEditData
   };
 };
 

@@ -103,24 +103,25 @@ export const ItemBase: React.FC<ItemProps & {
     fn: (kv, [id]) =>
       kv[id] ?? { title: "Something went wrong", text: "Item not found" },
   });
+
+    const itemEditValues = useStoreMap({
+        store: units.$itemsDynamicState,
+        keys: [props.id],
+        fn: (kv, [id]) =>
+                kv[id] ?? { editTitle: "Something went wrong", editText: "Item not found" },
+    });
+
   const toggleCollapse = useEvent(units.toggleCollapsed);
   const remove = useEvent(units.removeItem);
 
-  const [titleInputValue, setTitleInputValue] = React.useState(item.title);
-  const [descriptionInputValue, setDescriptionInputValue] = React.useState(
-    item.text,
-  );
-  const saveEvent = useEvent(units.updateItem);
+  const inputText = useEvent(units.editItemText);
+  const inputTitle = useEvent(units.editItemTitle);
+
+  const saveEvent = useEvent(units.saveEditData);
   const toggleEditMode = useEvent(units.toggleEditMode);
 
   const handeSave = () => {
-    saveEvent({
-      upd: {
-        title: titleInputValue,
-        text: descriptionInputValue,
-      },
-      id: props.id,
-    });
+    saveEvent(props.id);
     toggleEditMode(props.id)
   };
 
@@ -167,21 +168,22 @@ export const ItemBase: React.FC<ItemProps & {
               placeholder={"Title"}
               autoFocus
               defaultValue={item.title}
-              value={titleInputValue}
+              value={itemEditValues.editTitle}
               enterKeyHint={"enter"}
               type={"success"}
               onChange={(event) =>
-                setTitleInputValue(event.target.value)
+                inputTitle({id: props.id, text: event.target.value})
               }
             />
             <Input
               scale={2 / 3}
               placeholder={"Description"}
-              value={descriptionInputValue}
+              defaultValue={item.text}
+              value={itemEditValues.editText}
               enterKeyHint={"enter"}
               type={"success"}
               onChange={(event) =>
-                setDescriptionInputValue(event.target.value)
+                inputText({id: props.id, text: event.target.value})
               }
             />
           </>

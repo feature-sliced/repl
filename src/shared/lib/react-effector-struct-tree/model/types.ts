@@ -17,5 +17,9 @@ export type ItemState = {
   editMode: boolean;
 };
 
+export type ItemDynamicState = {
+  editTitle: string;
+  editText: string;
+}
 
 export type ItemKV = Record<Id, ItemDetails>;
