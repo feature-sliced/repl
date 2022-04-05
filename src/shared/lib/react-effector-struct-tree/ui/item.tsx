@@ -169,23 +169,23 @@ export const ItemBase: React.FC<ItemProps & {
           <>
             <Input
               scale={2 / 3}
-              placeholder={"Title"}
+              placeholder="Title"
               autoFocus
               defaultValue={item.title}
               value={itemEditValues.editTitle}
-              enterKeyHint={"enter"}
-              type={"success"}
+              enterKeyHint="enter"
+              type="success"
               onChange={(event) =>
                 inputTitle({id: props.id, text: event.target.value})
               }
             />
             <Input
               scale={2 / 3}
-              placeholder={"Description"}
+              placeholder="Description"
               defaultValue={item.text}
               value={itemEditValues.editText}
-              enterKeyHint={"enter"}
-              type={"success"}
+              enterKeyHint="enter"
+              type="success"
               onChange={(event) =>
                 inputText({id: props.id, text: event.target.value})
               }
