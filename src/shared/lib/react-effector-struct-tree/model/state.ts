@@ -10,7 +10,6 @@ import {
   flatTreeToList, ROOT_ID, isOutOfBounds,
 } from "./lib";
 import type { DragStartEvent, DragEndEvent, DragOverEvent } from "@dnd-kit/core";
-import { debug, spread } from "patronum";
 
 export const defaultItemState = {
   collapsed: false,
@@ -203,19 +202,30 @@ export const createTreeState = (config: { limitX?: number; limitY?: number } = {
     }
   );
 
+  // prevent race condition
+  const editDataSaved = createEvent();
+
+  // save edit data to kv
   sample({
     source: $itemsKv,
     clock: sample({
-      source: $itemsDynamicState,
       clock: saveEditData,
+      source: $itemsDynamicState,
       fn: (state, id) => ({ id: id, data: state[id] }),
     }),
     fn: (reg, payload) => ({
       ...reg,
       [payload.id]: { ...reg[payload.id], text: payload.data.editText, title: payload.data.editTitle }
     }),
-    target: $itemsKv
+    target: [$itemsKv, editDataSaved]
   });
+
+  // toggle edit mode on dataSaved
+  sample({
+    clock: editDataSaved,
+    source: saveEditData,
+    target: toggleEditMode,
+  })
 
   // used for drag with children's
   const setCollapse = createEvent<[Id, boolean]>();

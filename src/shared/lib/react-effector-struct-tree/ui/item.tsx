@@ -97,6 +97,7 @@ export const ItemBase: React.FC<ItemProps & {
   const theme = useTreeTheme();
   const units = useTreeUnits();
   const hoveredTreeNodeId = useStore(units.$hoveredNodeId);
+
   const item = useStoreMap({
     store: units.$itemsKv,
     keys: [props.id],
@@ -104,12 +105,12 @@ export const ItemBase: React.FC<ItemProps & {
       kv[id] ?? { title: "Something went wrong", text: "Item not found" },
   });
 
-    const itemEditValues = useStoreMap({
-        store: units.$itemsDynamicState,
-        keys: [props.id],
-        fn: (kv, [id]) =>
-                kv[id] ?? { editTitle: "Something went wrong", editText: "Item not found" },
-    });
+  const itemEditValues = useStoreMap({
+      store: units.$itemsDynamicState,
+      keys: [props.id],
+      fn: (kv, [id]) =>
+              kv[id] ?? { editTitle: "Something went wrong", editText: "Item not found" },
+  });
 
   const toggleCollapse = useEvent(units.toggleCollapsed);
   const remove = useEvent(units.removeItem);
@@ -122,7 +123,10 @@ export const ItemBase: React.FC<ItemProps & {
 
   const handeSave = () => {
     saveEvent(props.id);
-    toggleEditMode(props.id)
+  };
+
+  const handeEditMode = () => {
+    toggleEditMode(props.id);
   };
 
   return (
@@ -156,7 +160,7 @@ export const ItemBase: React.FC<ItemProps & {
                   scale={1 / 3}
                   type="secondary-light"
                   ghost
-                  onClick={() => toggleEditMode(props.id)}
+                  onClick={handeEditMode}
                 />
               )}
             </span>
@@ -212,7 +216,7 @@ export const ItemBase: React.FC<ItemProps & {
             scale={1 / 3}
             type="error"
             ghost
-            onClick={() => toggleEditMode(props.id)}
+            onClick={handeEditMode}
           />
         ) : (
           <Button
