@@ -12,7 +12,7 @@ import {
 import { useStore, useStoreMap } from "effector-react";
 import { useTreeUnits } from "./context";
 import { Item, ItemBase } from "./item";
-import { Tree } from "../model";
+import { Tree, defaultItemState } from "../model";
 import { useEvent } from "effector-react/scope";
 import { IS_BROWSER } from "shared/config/constants";
 
@@ -54,12 +54,12 @@ const SubTree: React.FC<{ tree: Tree }> = (props) => {
   const state = useStoreMap({
     store: units.$itemsState,
     keys: [tree.id],
-    fn: (reg, [id]) => reg[id] ?? { collapsed: false },
+    fn: (reg, [id]) => reg[id] ?? defaultItemState,
   });
 
   return (
     <>
-      <Item depth={tree.depth} id={tree.id} collapsed={state.collapsed} />
+      <Item depth={tree.depth} id={tree.id} collapsed={state.collapsed} editMode={state.editMode}/>
       {!state.collapsed &&
         tree.children.map((subtree) => (
           <SubTree key={subtree.id} tree={subtree} />
@@ -76,7 +76,7 @@ const Overlay: React.FC = () => {
 
   return createPortal(
     <DragOverlay>
-      {targetId ? <ItemBase depth={0} id={targetId} collapsed /> : null}
+      {targetId ? <ItemBase depth={0} id={targetId} collapsed editMode={false}/> : null}
     </DragOverlay>,
     document.body
   );

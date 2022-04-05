@@ -12,4 +12,14 @@ export type ItemDetails = {
   text?: string;
 };
 
+export type ItemState = {
+  collapsed: boolean;
+  editMode: boolean;
+};
+
+export type ItemDynamicState = {
+  editTitle: string;
+  editText: string;
+}
+
 export type ItemKV = Record<Id, ItemDetails>;
